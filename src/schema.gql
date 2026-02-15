@@ -1,0 +1,139 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input AddNoteInput {
+  applicationId: ID!
+  body: String!
+}
+
+type ApplicationConnection {
+  edges: [ApplicationEdge!]!
+  pageInfo: PageInfo!
+}
+
+type ApplicationEdge {
+  cursor: String!
+  node: ApplicationGQL!
+}
+
+type ApplicationGQL {
+  appliedAt: DateTime!
+  createdAt: DateTime!
+  id: ID!
+  job: JobGQL!
+  notes: [NoteGQL!]!
+  sourceUrl: String
+  status: ApplicationStatus!
+  updatedAt: DateTime!
+}
+
+enum ApplicationStatus {
+  APPLIED
+  INTERVIEW_1
+  INTERVIEW_2
+  OFFER
+  ONSITE
+  RECRUITER_SCREEN
+  REJECTED
+  WITHDRAWN
+}
+
+input ApplicationsFilterInput {
+  companyId: ID
+  jobId: ID
+  search: String
+  statuses: [ApplicationStatus!]
+}
+
+type AuthPayload {
+  accessToken: String!
+}
+
+type CompanyGQL {
+  createdAt: DateTime!
+  id: ID!
+  name: String!
+  website: String
+}
+
+input CreateApplicationInput {
+  jobId: ID!
+  sourceUrl: String
+}
+
+input CreateCompanyInput {
+  name: String!
+  website: String
+}
+
+input CreateJobInput {
+  companyId: ID!
+  description: String
+  location: String
+  title: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type JobGQL {
+  company: CompanyGQL!
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  location: String
+  title: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type Me {
+  email: String!
+  userId: String!
+}
+
+input MoveStatusInput {
+  applicationId: ID!
+  status: ApplicationStatus!
+}
+
+type Mutation {
+  addNote(input: AddNoteInput!): NoteGQL!
+  createApplication(input: CreateApplicationInput!): ApplicationGQL!
+  createCompany(input: CreateCompanyInput!): CompanyGQL!
+  createJob(input: CreateJobInput!): JobGQL!
+  login(input: LoginInput!): AuthPayload!
+  moveApplicationStatus(input: MoveStatusInput!): ApplicationGQL!
+  signup(input: SignupInput!): AuthPayload!
+}
+
+type NoteGQL {
+  body: String!
+  createdAt: DateTime!
+  id: ID!
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+}
+
+type Query {
+  application(id: ID!): ApplicationGQL!
+  applicationsConnection(after: String, filter: ApplicationsFilterInput, first: Int!): ApplicationConnection!
+  companies: [CompanyGQL!]!
+  jobs(companyId: ID): [JobGQL!]!
+  me: Me!
+}
+
+input SignupInput {
+  email: String!
+  name: String
+  password: String!
+}

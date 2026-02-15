@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+enum ApplicationStatus {
+  APPLIED
+  RECRUITER_SCREEN
+  INTERVIEW_1
+  INTERVIEW_2
+  ONSITE
+  OFFER
+  REJECTED
+  WITHDRAWN
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String?
+  password     String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  memberships  Membership[]
+  applications Application[]
+  notes        Note[]
+  activity     ActivityLog[] @relation("ActorLogs")
+}
+
+model Company {
+  id          String       @id @default(cuid())
+  name        String
+  website     String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  jobs        Job[]
+  memberships Membership[]
+}
+
+model Membership {
+  id        String   @id @default(cuid())
+  role      Role     @default(OWNER)
+
+  userId    String
+  companyId String
+
+  user      User     @relation(fields: [userId], references: [id])
+  company   Company  @relation(fields: [companyId], references: [id])
+
+  @@unique([userId, companyId])
+  @@index([companyId])
+}
+
+model Job {
+  id           String        @id @default(cuid())
+  title        String
+  description  String?
+  location     String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  companyId    String
+  company      Company       @relation(fields: [companyId], references: [id])
+
+  applications Application[]
+
+  @@index([companyId])
+}
+
+model Application {
+  id           String            @id @default(cuid())
+  status       ApplicationStatus @default(APPLIED)
+  sourceUrl    String?
+  appliedAt    DateTime          @default(now())
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  userId       String
+  jobId        String
+
+  user         User              @relation(fields: [userId], references: [id])
+  job          Job               @relation(fields: [jobId], references: [id])
+
+  notes        Note[]
+  activity     ActivityLog[]     @relation("EntityLogs")
+
+  @@index([userId, createdAt])
+  @@index([jobId])
+}
+
+model Note {
+  id            String      @id @default(cuid())
+  body          String
+  createdAt     DateTime    @default(now())
+
+  applicationId String
+  createdById   String
+
+  application   Application @relation(fields: [applicationId], references: [id])
+  createdBy     User        @relation(fields: [createdById], references: [id])
+
+  @@index([applicationId, createdAt])
+}
+
+model ActivityLog {
+  id            String       @id @default(cuid())
+  action        String
+  entityType    String
+  entityId      String
+  metadata      Json?
+  createdAt     DateTime     @default(now())
+
+  actorId       String
+  actor         User         @relation("ActorLogs", fields: [actorId], references: [id])
+
+  application   Application? @relation("EntityLogs", fields: [applicationId], references: [id])
+  applicationId String?
+}
